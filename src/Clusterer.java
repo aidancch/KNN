@@ -34,6 +34,7 @@ public class Clusterer {
         };
 
         Image[] images = new Image[numImages];
+        int[] realClassifications = new int[numImages];
 
         if(DEBUG) System.out.printf("Generating %d images...%n", numImages);
 
@@ -41,6 +42,7 @@ public class Clusterer {
 
             byte[][] pixels = new byte[sources[0].length][sources[0][0].length];
             int type = (int)(Math.random()*numSources);
+            realClassifications[i] = type;
 
             for (int j = 0; j < pixels.length; j++) {
                 for (int k = 0; k < pixels[0].length; k++) {
@@ -58,6 +60,7 @@ public class Clusterer {
         Clusterer clusterer = new Clusterer();
         clusterer.cluster(images, 3);
 
+        printClassifications(images, realClassifications);
         Viewer.view(images, 50);
     }
 
@@ -90,7 +93,7 @@ public class Clusterer {
 
         fillBuckets(buckets, means, images, k);
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 1; i++) {
             calculateMeans(buckets);
             buckets = createBuckets(k);
             fillBuckets(buckets, means, images, 0);
@@ -148,6 +151,12 @@ public class Clusterer {
             for(Image img : buckets[i]) {
                 img.classify(i);
             }
+        }
+    }
+
+    private static void printClassifications(Image[] images, int[] realClassifications) {
+        for (int i = 0; i < images.length; i++) {
+            System.out.printf("Image #%d: clustered as %d, really %d.%n", i, images[i].digit(), realClassifications[i]);
         }
     }
 
