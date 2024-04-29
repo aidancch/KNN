@@ -193,6 +193,9 @@ public class Image {
         return image(THRESHOLD);
     }
 
+    public double dist() {
+        return distance(2);
+    }
     public double distance() {
         return distance(2);
     }
@@ -213,6 +216,9 @@ public class Image {
         }
 
         return Math.pow(sum, 1.0/L);
+    }
+    public double dist(Image other) {
+        return distance(other, 2);
     }
     public double distance(Image other) {
         return distance(other, 2);
