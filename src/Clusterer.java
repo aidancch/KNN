@@ -97,7 +97,7 @@ public class Clusterer {
         }
 
         if(DEBUG) System.out.printf("Clustering complete.%n");
-        setImageIDsByBucketIndex(buckets);
+        classifyImagesByBucketIndex(buckets);
     }
 
     public ArrayList<Image>[] createBuckets(int k) {
@@ -143,10 +143,10 @@ public class Clusterer {
         }
     }
 
-    public void setImageIDsByBucketIndex(ArrayList<Image>[] buckets) {
+    public void classifyImagesByBucketIndex(ArrayList<Image>[] buckets) {
         for (int i = 0; i < buckets.length; i++) {
             for(Image img : buckets[i]) {
-                img.setId(i);
+                img.classify(i);
             }
         }
     }
