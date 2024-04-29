@@ -4,6 +4,6 @@ public class Reader {
     }
 
     public Image[] read() {
-
+        return null;
     }
 }
