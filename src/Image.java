@@ -192,4 +192,47 @@ public class Image {
     public String image() {
         return image(THRESHOLD);
     }
+
+    public double distance() {
+        return distance(2);
+    }
+    public double distance(int L) {
+        double sum = 0;
+        double pow = 1;
+
+        for (byte[] line : pixels) {
+            for (byte pixel : line) {
+
+                for (int k = 0; k < L; k++) {
+                    pow *= pixel;
+                }
+
+                sum += pow;
+                pow = 1;
+            }
+        }
+
+        return Math.pow(sum, 1.0/L);
+    }
+    public double distance(Image other) {
+        return distance(other, 2);
+    }
+    public double distance(Image other, int L) {
+        double sum = 0;
+        double pow = 1;
+
+        for (int i = 0; i < pixels.length; i++) {
+            for (int j = 0; j < pixels[0].length; j++) {
+
+                for (int k = 0; k < L; k++) {
+                    pow *= this.pixels[i][j] - other.pixels[i][j];
+                }
+
+                sum += pow;
+                pow = 1;
+            }
+        }
+
+        return Math.pow(sum, 1.0/L);
+    }
 }
