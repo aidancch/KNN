@@ -1,17 +1,64 @@
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class Clusterer {
+    private static boolean DEBUG = Main.DEBUG;
 
     public static void main(String[] args) {
-        Image[] images = new Image[1000];
+        int numImages = 1000;
+        int numSources = 3;
+        int variance = 32;
+
+        // test
+
+        // 3 different source types:
+        // type a:      type b:      type c:
+        // 00, FF, 00   FF, FF, 00   88, FF, 00
+        // FF, 88, FF   FF, 88, FF   FF, 00, 00
+        // FF, 00, FF   FF, FF, 00   88, FF, 00
+        int[][][] sources = {
+            {
+                {0x00,0xFF,0x00},
+                {0xFF,0x88,0xFF},
+                {0xFF,0x00,0xFF}
+            },
+            {
+                {0xFF,0xFF,0x00},
+                {0xFF,0x88,0xFF},
+                {0xFF,0xFF,0x00}
+            },
+            {
+                {0x88,0xFF,0x00},
+                {0xFF,0x00,0x00},
+                {0x88,0xFF,0x00}
+            }
+        };
+
+        Image[] images = new Image[numImages];
+
+        if(DEBUG) System.out.printf("Generating %d images...%n", numImages);
+
         for (int i = 0; i < images.length; i++) {
-            images[i] = new Image(new byte[3][3]);
+
+            byte[][] pixels = new byte[sources[0].length][sources[0][0].length];
+            int type = (int)(Math.random()*numSources);
+
+            for (int j = 0; j < pixels.length; j++) {
+                for (int k = 0; k < pixels[0].length; k++) {
+                    int var = (int)(Math.random()* (2 * variance + 1)) - variance;
+
+                    int value = sources[type][j][k] + var;
+
+                    pixels[j][k] = (byte) Math.min(Math.max(0, value), 255);
+                }
+            }
+
+            images[i] = new Image(pixels);
         }
 
         Clusterer clusterer = new Clusterer();
+        clusterer.cluster(images, 3);
 
-        clusterer.cluster(images, 10);
+        Viewer.view(images, 50);
     }
 
     // takes in data and creates labels from it
@@ -24,11 +71,13 @@ public class Clusterer {
     //  drop images in buckets their distance is closest to
     // continue until "stabilized" -> very few images move buckets each iteration
 
-    public ArrayList<Image>[] cluster(Image[] images) {
-        return cluster(images, Math.min(10, images.length));
+    public void cluster(Image[] images) {
+        cluster(images, Math.min(10, images.length));
     }
-    public ArrayList<Image>[] cluster(Image[] images, int k) {
+    public void cluster(Image[] images, int k) {
         assert images.length >= k;
+
+        if(DEBUG) System.out.printf("Clustering %d images into %d groups...%n", images.length, k);
 
         // bucket array cannot be an array; "You cannot create arrays of parameterized types"
         ArrayList<Image>[] buckets = createBuckets(k);
@@ -47,7 +96,8 @@ public class Clusterer {
             fillBuckets(buckets, means, images, 0);
         }
 
-        return buckets;
+        if(DEBUG) System.out.printf("Clustering complete.%n");
+        setImageIDsByBucketIndex(buckets);
     }
 
     public ArrayList<Image>[] createBuckets(int k) {
@@ -73,18 +123,31 @@ public class Clusterer {
         return means;
     }
     public void fillBuckets(ArrayList<Image>[] buckets, double[] means, Image[] images, int startIndex) {
-        double dist;
+        double dist, minDiff;
         int min = 0;
         for (int i = startIndex; i < images.length; i++) {
             dist = images[i].dist();
 
-            for (int j = 0; j < means.length; j++) {
-                if(Math.abs(means[i] - dist) < Math.abs(means[min] - dist)) {
-                    min = i;
+            minDiff = Math.abs(means[min] - dist);
+
+            for (int j = 1; j < means.length; j++) {
+                double diff = Math.abs(means[j] - dist);
+
+                if(diff < minDiff) {
+                    min = j;
+                    minDiff = diff;
                 }
             }
 
             buckets[min].add(images[i]);
+        }
+    }
+
+    public void setImageIDsByBucketIndex(ArrayList<Image>[] buckets) {
+        for (int i = 0; i < buckets.length; i++) {
+            for(Image img : buckets[i]) {
+                img.setId(i);
+            }
         }
     }
 

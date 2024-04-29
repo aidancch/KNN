@@ -64,7 +64,6 @@ public class Image {
     public int id() {
         return this.id;
     }
-
     public void setId(int id) {
         this.id = id;
     }
@@ -72,6 +71,8 @@ public class Image {
     public int digit() {
         return this.digit;
     }
+    public void setDigit(int digit) { this.digit = digit; }
+    public void classify(int classificiation) { this.setDigit(classificiation); }
 
     public int rows() {
         return this.rows;

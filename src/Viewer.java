@@ -9,6 +9,8 @@ public class Viewer {
     private static int digit = -1;
     private static Gui gui;
 
+    private static boolean DEBUG = Main.DEBUG;
+
 
     public static Image next() {
         if (list.size() > 0) {
@@ -161,8 +163,17 @@ public class Viewer {
             }
         }
 
-        Canvas canvas = new Canvas(28, 28);
-        gui = new Gui(canvas, pixels);
+        view(pixels);
+    }
+
+    public static void view(Image[] images, int scale) {
+        Viewer.images = images;
+        view(scale);
+    }
+    public static void view(int scale) {
+        if(DEBUG) System.out.printf("Displaying images in GUI...%n");
+        Canvas canvas = new Canvas(images[0].rows(), images[0].columns());
+        gui = new Gui(canvas, scale);
         gui.draw(next());
     }
 }
