@@ -195,51 +195,35 @@ public class Image {
     }
 
     public double dist() {
-        return distance(2);
+        return distance();
     }
     public double distance() {
-        return distance(2);
-    }
-    public double distance(int L) {
-        double sum = 0;
-        double pow = 1;
-
-        for (byte[] line : pixels) {
-            for (byte pixel : line) {
-
-                for (int k = 0; k < L; k++) {
-                    pow *= pixel;
-                }
-
-                sum += pow;
-                pow = 1;
+        // just using L2 for now
+        int sum = 0;
+        for (byte[] row : pixels) {
+            for (byte pixel : row) {
+                // convert unsigned byte to int
+                int value = pixel & 0xFF;
+                sum += value * value;
             }
         }
-
-        return Math.pow(sum, 1.0/L);
+        return Math.pow(sum, 0.5);
     }
     public double dist(Image other) {
-        return distance(other, 2);
+        return distance(other);
     }
     public double distance(Image other) {
-        return distance(other, 2);
-    }
-    public double distance(Image other, int L) {
         double sum = 0;
-        double pow = 1;
 
         for (int i = 0; i < pixels.length; i++) {
             for (int j = 0; j < pixels[0].length; j++) {
-
-                for (int k = 0; k < L; k++) {
-                    pow *= this.pixels[i][j] - other.pixels[i][j];
-                }
-
-                sum += pow;
-                pow = 1;
+                // convert unsigned byte to int
+                int pixA = this.pixels[i][j] & 0xFF, pixB = other.pixels[i][j] & 0xFF;
+                int diff = pixA - pixB;
+                sum += diff * diff;
             }
         }
 
-        return Math.pow(sum, 1.0/L);
+        return Math.pow(sum, 0.5);
     }
 }
