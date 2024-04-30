@@ -11,7 +11,6 @@ public class Viewer {
 
     private static boolean DEBUG = Main.DEBUG;
 
-
     public static Image next() {
         if (list.size() > 0) {
             if (current < list.size()) {
@@ -150,8 +149,7 @@ public class Viewer {
         if (errors > 0) return;
 
         try {
-            Reader reader = new Reader(imageFileName, labelFileName);
-            images = reader.read();
+            images = Reader.read(imageFileName, labelFileName);
         } catch (IOException e) {
             System.err.println("Could not read dataset: " + e.getMessage());
             return;
