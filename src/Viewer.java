@@ -171,7 +171,7 @@ public class Viewer {
         view(scale);
     }
     public static void view(int scale) {
-        if(DEBUG) System.out.printf("Displaying images in GUI...%n");
+        if(DEBUG) System.out.printf("Viewer: Displaying images in GUI...%n");
         Canvas canvas = new Canvas(images[0].rows(), images[0].columns());
         gui = new Gui(canvas, scale);
         gui.draw(next());
