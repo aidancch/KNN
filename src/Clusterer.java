@@ -21,25 +21,23 @@ public class Clusterer {
         // FF, 88, FF   FF, 88, FF   FF, 00, 00
         // FF, 00, FF   FF, FF, 00   88, FF, 00
 
-        byte[][][] sources = TestSet.generateSourceImages(numSources, rows, cols);
-
-//        {
-//            {
-//                {0x00, 0x00, 0x00},
-//                {0x00, 0x00, 0x00},
-//                {0x00, 0x00, 0x00}
-//            },
-//            {
-//                {0x80, 0x80, 0x80},
-//                {0x80, 0x80, 0x80},
-//                {0x80, 0x80, 0x80}
-//            },
-//            {
-//                {0xFF, 0xFF, 0xFF},
-//                {0xFF, 0xFF, 0xFF},
-//                {0xFF, 0xFF, 0xFF}
-//            }
-//        };
+        byte[][][] sources = {
+            {
+                {0x00, 0x00, 0x00},
+                {0x00, 0x00, 0x00},
+                {0x00, 0x00, 0x00}
+            },
+            {
+                {(byte)0x80, (byte)0x80, (byte)0x80},
+                {(byte)0x80, (byte)0x80, (byte)0x80},
+                {(byte)0x80, (byte)0x80, (byte)0x80}
+            },
+            {
+                {(byte)0xFF, (byte)0xFF, (byte)0xFF},
+                {(byte)0xFF, (byte)0xFF, (byte)0xFF},
+                {(byte)0xFF, (byte)0xFF, (byte)0xFF}
+            }
+        };
 
         Image[] images = TestSet.generateImagesFromSources(numImages, sources, variance);
         int[] realClassifications = new int[numImages];
