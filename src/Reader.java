@@ -57,7 +57,7 @@ public class Reader {
 
         for(int i = 0; i < numberOfImages; i++) {
             Image image = new Image(rows, cols);
-            image.setId(labelInputStream.readUnsignedByte());
+            image.setDigit(labelInputStream.readUnsignedByte());
             for (int j = 0; j < rows; j++) {
                 for (int k = 0; k < cols; k++) {
                     image.set(j, k, dataInputStream.readUnsignedByte());

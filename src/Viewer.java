@@ -32,7 +32,6 @@ public class Viewer {
         return null;
     }
 
-
     public static Image prev() {
         if (list.size() > 0) {
             if (current > 1) {
@@ -56,7 +55,6 @@ public class Viewer {
 
         return null;
     }
-
 
     public static int checkValue(String arg, int lo, int hi) {
         int value = Integer.parseInt(arg);

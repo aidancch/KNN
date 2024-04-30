@@ -8,5 +8,15 @@ import java.io.InputStream;
 public class Main {
     public static boolean DEBUG = true;
 
-    public static void main(String[] args) {}
+    public static void main(String[] args) {
+        Image[] images = null;
+
+        try {
+            images = Reader.read("src/train-images.idx3-ubyte", "src/train-labels.idx1-ubyte");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        Viewer.view(images,10);
+    }
 }
