@@ -153,15 +153,15 @@ public class Clusterer {
 
         return means;
     }
-    public void fillBuckets() {
+    private void fillBuckets() {
         fillBuckets(0);
     }
-    public void fillBuckets(int startIndex) {
+    private void fillBuckets(int startIndex) {
         for (int i = startIndex; i < images.length; i++) {
             buckets[ closestBucket(images[i]) ].add( images[i] );
         }
     }
-    public int closestBucket(Image img) {
+    private int closestBucket(Image img) {
         int min = 0;
         double minDiff = Double.MAX_VALUE;
 
@@ -176,10 +176,13 @@ public class Clusterer {
 
         return min;
     }
-    public double norm(int bucketIndex, Image img) {
+    private double norm(int bucketIndex, Image img) {
         return Math.abs(img.dist(means[bucketIndex]));
     }
-    public static boolean equalArrays(ArrayList<Image>[] buckets1, ArrayList<Image>[] buckets2) {
+    private double dist(int bucketIndex, Image img) {
+        return Math.abs(means[bucketIndex].dist() - img.dist());
+    }
+    private static boolean equalArrays(ArrayList<Image>[] buckets1, ArrayList<Image>[] buckets2) {
         if(buckets1.length != buckets2.length) return false;
 
         for (int i = 0; i < buckets1.length; i++) {
@@ -193,7 +196,7 @@ public class Clusterer {
         return true;
     }
 
-    public void classifyImagesByBucketIndex() {
+    private void classifyImagesByBucketIndex() {
         if(FULL_DEBUG || CLUSTER_DEBUG || CLASSIFY_DEBUG || PROCESS_DEBUG) System.out.println("Clusterer (Any): Classifying images by bucket index...");
         for (int i = 0; i < buckets.length; i++) {
             for(Image img : buckets[i]) {
@@ -211,7 +214,7 @@ public class Clusterer {
         }
     }
 
-    public void analyzeBuckets(int[] realClassifications) {
+    private void analyzeBuckets(int[] realClassifications) {
         int num = 0;
         for(ArrayList<Image> bucket : buckets) {
             int countA = 0, countB = 0, countC = 0;
