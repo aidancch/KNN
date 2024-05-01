@@ -10,7 +10,7 @@ public class Image {
     private int id;
     private int digit;
     private int rows;
-    private int columns; //test
+    private int columns;
     private byte[][] pixels;
 
     public Image(int rows, int columns, int digit) {
