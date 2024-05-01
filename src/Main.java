@@ -22,12 +22,14 @@ public class Main {
             throw new RuntimeException(e);
         }
 
-        Clusterer clusterer = new Clusterer(images, 10, images[0].rows(), images[0].columns());
-        clusterer.cluster(100 );
-        clusterer.analyzeBuckets(correctDigits);
-        Image[] bucket = clusterer.getBucket(6);
+        Image.downsize(images, 2);
 
-        Viewer.view(bucket, 10);
-//        Viewer.view(images,10);
+//        Clusterer clusterer = new Clusterer(images, 10, images[0].rows(), images[0].columns());
+//        clusterer.cluster(100 );
+//        clusterer.analyzeBuckets(correctDigits);
+//        Image[] bucket = clusterer.getBucket(6);
+
+//        Viewer.view(bucket, 10);
+        Viewer.view(images,20);
     }
 }
