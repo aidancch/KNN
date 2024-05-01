@@ -146,6 +146,7 @@ public class Image {
         this.rows = this.rows / scale;
     }
     public static void downsize(Image[] images, int scale) {
+        if(Main.DEBUG) System.out.printf("Downsizing images by %d%n", scale);
         for (Image img : images) {
             img.downsize(scale);
         }
