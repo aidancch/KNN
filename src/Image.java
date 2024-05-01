@@ -126,7 +126,24 @@ public class Image {
     }
 
     public void downsize(int scale) {
+        assert this.rows % scale == 0 && this.columns % scale == 0;
 
+        byte[][] newPix = new byte[this.rows / scale][this.columns / scale];
+        for (int i = 0; i < newPix.length; i++) {
+            for (int j = 0; j < newPix[0].length; j++) {
+                int sum = 0;
+                for (int y = i * scale; y < (i + 1) * scale; y++) {
+                    for (int x = j * scale; x < (j + 1) * scale; x++) {
+                        sum += this.pixels[y][x];
+                    }
+                }
+                newPix[i][j] = (byte)(sum / (scale * scale));
+            }
+        }
+
+        this.pixels = newPix;
+        this.columns = this.columns / scale;
+        this.rows = this.rows / scale;
     }
 
 
