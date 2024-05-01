@@ -115,7 +115,7 @@ public class Image {
     }
 
 
-    public void reduce(int threshold) {
+    public void threshold(int threshold) {
         for (int row = 0; row < this.rows; row++) {
             for (int col = 0; col < this.columns; col++) {
                 int pixel = this.pixels[row][col];
@@ -123,6 +123,10 @@ public class Image {
                 this.pixels[row][col] = (byte) pixel;
             }
         }
+    }
+
+    public void downsize(int scale) {
+
     }
 
 

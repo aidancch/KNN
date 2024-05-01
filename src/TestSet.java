@@ -16,7 +16,7 @@ public class TestSet {
     }
 
     public static byte[][][] generateSourceImages(int number, int rows, int cols) {
-        if(DEBUG) System.out.printf("TestSet: generating %d new source images...%n", number);
+        if(DEBUG) System.out.printf("TestSet: Seed %d, generating %d new source images...%n", seed, number);
         byte[][][] sourceImages = new byte[number][cols][rows];
 
         for (int i = 0; i < number; i++) {
@@ -33,27 +33,28 @@ public class TestSet {
 
     public static Image[] generateImagesFromSources(int number, byte[][][] sources, int variance) {
 
-        if(DEBUG) System.out.printf("TestSet: generating %d images from %d sources%n", number, sources.length);
+        if(DEBUG) System.out.printf("TestSet: Seed %d, generating %d images from %d sources%n", seed, number, sources.length);
 
         Image[] images = new Image[number];
 
         for (int i = 0; i < number; i++) {
 
             byte[][] pixels = new byte[sources[0].length][sources[0][0].length];
-            int source = (int) (Math.random() * sources.length);
+            int source = rand.nextInt(sources.length);
 
             for (int j = 0; j < pixels.length; j++) {
                 for (int k = 0; k < pixels[0].length; k++) {
-                    int var = (int)(Math.random() * (2 * variance + 1)) - variance;
 
-                    int value = sources[source][j][k] + var;
+                    int src = sources[source][j][k] & 0xFF;
+                    int var = variance == 0? 0 : rand.nextInt(-variance, variance);
+
+                    int value = src + var;
 
                     pixels[j][k] = (byte) Math.min(Math.max(0, value), 255);
                 }
             }
 
             images[i] = new Image(pixels, source);
-
         }
 
         return images;
@@ -66,10 +67,10 @@ public class TestSet {
     public static void printSources(byte[][][] sources) {
         System.out.println("TestSet: generated new source images: ");
 
-        for (int i = 0; i < sources[0][0].length; i++) {
-            for (byte[][] source : sources) {
-                for (byte[] col : source) {
-                    System.out.printf("%3d ", col[i] & 0xFF);
+        for (int i = 0; i < sources[0].length; i++) {
+            for (byte[][] src : sources) {
+                for (int j = 0; j < sources[0][0].length; j++) {
+                    System.out.printf("%3d ", src[i][j] & 0xFF);
                 }
                 System.out.print("  ");
             }

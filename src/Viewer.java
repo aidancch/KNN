@@ -155,7 +155,7 @@ public class Viewer {
 
         if (threshold > 0) {
             for (Image image : images) {
-                image.reduce(threshold);
+                image.threshold(threshold);
             }
         }
 
