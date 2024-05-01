@@ -145,7 +145,11 @@ public class Image {
         this.columns = this.columns / scale;
         this.rows = this.rows / scale;
     }
-
+    public static void downsize(Image[] images, int scale) {
+        for (Image img : images) {
+            img.downsize(scale);
+        }
+    }
 
     public boolean equals(Image other) {
         if (this.rows != other.rows) return false;
