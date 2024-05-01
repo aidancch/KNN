@@ -132,7 +132,7 @@ public class Clusterer {
                 if((DEBUG || PROCESS_DEBUG) && (FULL_DEBUG || CLUSTER_DEBUG)) System.out.printf("Clusterer (P/Cu): Tolerance met. Breaking after %d iterations.%n", i);
                 break;
             }
-            if(i % (iterations / 100) == 0 && (DEBUG || PROCESS_DEBUG)) {
+            if( (iterations / 100) != 0 && (i % (iterations / 100) == 0 && (DEBUG || PROCESS_DEBUG)) ) {
                 System.out.printf("Clusterer (P): %d%%, current difference: %d%n", i * (iterations / 100), difference);
             }
             if(DEBUG && (FULL_DEBUG || CLUSTER_DEBUG)) {

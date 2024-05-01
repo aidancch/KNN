@@ -9,7 +9,7 @@ public class Main {
     public static boolean DEBUG = false, PRINT_PROCESS = true;
 
     public static void main(String[] args) {
-        Image[] images = null;
+        Image[] images;
         int[] correctDigits;
 
         try {
@@ -24,12 +24,12 @@ public class Main {
 
         Image.downsize(images, 2);
 
-//        Clusterer clusterer = new Clusterer(images, 10, images[0].rows(), images[0].columns());
-//        clusterer.cluster(100 );
-//        clusterer.analyzeBuckets(correctDigits);
-//        Image[] bucket = clusterer.getBucket(6);
+        Clusterer clusterer = new Clusterer(images, 11, images[0].rows(), images[0].columns());
+        clusterer.cluster(10 );
+        clusterer.analyzeBuckets(correctDigits);
+        Image[] bucket = clusterer.getBucket(6);
 
 //        Viewer.view(bucket, 10);
-        Viewer.view(images,20);
+        Viewer.view(images,10);
     }
 }
