@@ -22,10 +22,10 @@ public class Main {
             throw new RuntimeException(e);
         }
 
-        Image.downsize(images, 2);
+//        Image.downsize(images, 2);
 
-        Clusterer clusterer = new Clusterer(images, 11, images[0].rows(), images[0].columns());
-        clusterer.cluster(10 );
+        Clusterer clusterer = new Clusterer(images, 32, images[0].rows(), images[0].columns());
+        clusterer.cluster(500);
         clusterer.analyzeBuckets(correctDigits);
         Image[] bucket = clusterer.getBucket(6);
 

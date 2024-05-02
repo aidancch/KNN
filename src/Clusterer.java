@@ -133,7 +133,7 @@ public class Clusterer {
                 break;
             }
             if( (iterations / 100) != 0 && (i % (iterations / 100) == 0 && (DEBUG || PROCESS_DEBUG)) ) {
-                System.out.printf("Clusterer (P): %d%%, current difference: %d%n", i * (iterations / 100), difference);
+                System.out.printf("Clusterer (P): %.2f%%, current difference: %d%n", i * 100.0 / iterations, difference);
             }
             if(DEBUG && (FULL_DEBUG || CLUSTER_DEBUG)) {
                 System.out.printf("Clusterer (Cu): sizes: %d, %d, %d%n", buckets[0].size(), buckets[1].size(), buckets[2].size());
