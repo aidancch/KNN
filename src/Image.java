@@ -52,6 +52,22 @@ public class Image {
         this(pixels, UNKNOWN);
     }
 
+    public Image(int[][] pixels) {
+        byte[][] bPix = new byte[pixels.length][pixels[0].length];
+
+        for (int i = 0; i < pixels.length; i++) {
+            for (int j = 0; j < pixels[i].length; j++) {
+                bPix[i][j] = (byte)pixels[i][j];
+            }
+        }
+
+        this.id = Image.count++;
+        this.digit = UNKNOWN;
+        this.rows = bPix.length;
+        this.columns = bPix[0].length;
+        this.pixels = bPix;
+    }
+
     public Image(Canvas canvas, int digit) {
         this(canvas.rows(), canvas.columns(), digit);
         for (int row = 0; row < canvas.rows(); row++) {

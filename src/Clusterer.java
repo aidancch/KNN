@@ -6,7 +6,7 @@ public class Clusterer {
             DEBUG = Main.DEBUG,
             FULL_DEBUG = false,
             PROCESS_DEBUG = Main.PRINT_PROCESS,
-            CLUSTER_DEBUG = true,
+            CLUSTER_DEBUG = false,
             CLASSIFY_DEBUG = false,
             STATS = true;
 
@@ -62,132 +62,152 @@ public class Clusterer {
     //  drop images in buckets their distance is closest to
     // continue until "stabilized" -> very few images move buckets each iteration
 
-    private ArrayList<Image>[] buckets;
+    private int[] buckets;
     private int k;
     private Image[] means;
     private Image[] images;
     private int rows, cols;
 
     public Image[] getBucket(int i) {
-        Image[] imgs = new Image[buckets[i].size()];
-        buckets[i].toArray(imgs);
-        return imgs;
+        ArrayList<Image> bucket = new ArrayList<>();
+
+        for (int j = 0; j < buckets.length; j++) {
+            if (buckets[j] == i) bucket.add(images[j]);
+        }
+
+        Image[] imgs = new Image[bucket.size()];
+        return bucket.toArray(imgs);
+    }
+    public Image[] getMeans() {
+        return means;
     }
 
     public Clusterer() {}
+
     public Clusterer(Image[] images, int k) {
         this.images = images;
-        this.k = k;
-        this.buckets = new ArrayList[k];
         this.rows = images[0].rows();
         this.cols = images[0].columns();
+        this.k = k;
+        this.means = new Image[k];
+        this.buckets = new int[images.length];
     }
-    public Clusterer(Image[] images, int k, int rows, int cols){
+
+    public Clusterer(Image[] images, int k, int rows, int cols) {
         this.images = images;
         this.rows = rows;
         this.cols = cols;
         this.k = k;
-        this.buckets = new ArrayList[k];
+        this.means = new Image[k];
+        this.buckets = new int[images.length];
     }
 
     public void cluster(Image[] images) {
         this.images = images;
         this.k = Math.min(10, images.length);
-        this.buckets = new ArrayList[k];
+        this.buckets = new int[images.length];
         cluster(1000, images.length / 1000);
     }
-    public void cluster(int interactions) {
-        cluster(interactions, -1);
+
+    public void cluster(int iterations) {
+        cluster(iterations, -1);
     }
+
     public void cluster(int iterations, int tolerance) {
         assert images != null && k != 0 && buckets != null;
-        if(tolerance == -1) tolerance = images.length / 1000;
+        if (tolerance == -1) tolerance = images.length / 1000;
 
-        if((DEBUG || PROCESS_DEBUG) && (FULL_DEBUG || CLUSTER_DEBUG)) {
+        if (DEBUG || PROCESS_DEBUG || FULL_DEBUG || CLUSTER_DEBUG) {
             System.out.printf("Clusterer (P): Clustering %d images into %d groups for %d iterations...%n",
                     images.length, k, iterations);
         }
 
         // bucket array cannot be an array; "You cannot create arrays of parameterized types"
-        ArrayList<Image>[] oldBuckets;
-        buckets = createEmptyBuckets(k);
+        buckets = new int[images.length];
 
         for (int i = 0; i < k; i++) {
-            buckets[i].add(images[i]);
+            buckets[i] = i;
+            means[i] = images[i];
         }
 
-        means = calculateMeans();
+        calculateMeans();
         fillBuckets(k);
-        if(DEBUG && (FULL_DEBUG || CLUSTER_DEBUG)) {
-            System.out.printf("Clusterer (Cu): sizes: %d, %d, %d%n", buckets[0].size(), buckets[1].size(), buckets[2].size());
-        }
 
-        for (int i = 0; i < iterations; i++) {
-            means = calculateMeans();
-            oldBuckets = buckets;
-            buckets = createEmptyBuckets(k);
-            fillBuckets();
-            int difference = difference(oldBuckets, buckets);
-            if(difference <= tolerance) {
-                if((DEBUG || PROCESS_DEBUG) && (FULL_DEBUG || CLUSTER_DEBUG)) System.out.printf("Clusterer (P/Cu): Tolerance met. Breaking after %d iterations.%n", i);
+        for (int i = 0; ; i++) {
+            calculateMeans();
+            int difference = fillBuckets();
+
+            if (difference <= tolerance) {
+                if (DEBUG || PROCESS_DEBUG || FULL_DEBUG || CLUSTER_DEBUG)
+                    System.out.printf("Clusterer (P/Cu): Tolerance met. Breaking after %d iterations.%n", i);
                 break;
             }
-            if( (iterations / 100) != 0 && (i % (iterations / 100) == 0 && (DEBUG || PROCESS_DEBUG)) ) {
-                System.out.printf("Clusterer (P): %.2f%%, current difference: %d%n", i * 100.0 / iterations, difference);
+            if(iterations > 0 && i >= iterations) {
+                if (DEBUG || PROCESS_DEBUG || FULL_DEBUG || CLUSTER_DEBUG)
+                    System.out.printf("Clusterer (P/Cu): %d Iterations met.%n", iterations);
+                break;
             }
-            if(DEBUG && (FULL_DEBUG || CLUSTER_DEBUG)) {
-                System.out.printf("Clusterer (Cu): sizes: %d, %d, %d%n", buckets[0].size(), buckets[1].size(), buckets[2].size());
+
+            if ((iterations / 100) != 0 && (i % (iterations / 100) == 0 && (DEBUG || PROCESS_DEBUG))) {
+                System.out.printf("Clusterer (P): %02.2f%%, current difference: %d%n", (i+1) * 100.0 / iterations, difference);
             }
         }
 
-        if((DEBUG || PROCESS_DEBUG) && (FULL_DEBUG || CLUSTER_DEBUG)) System.out.printf("Clusterer (P): Clustering complete.%n");
+        if (DEBUG || PROCESS_DEBUG || FULL_DEBUG || CLUSTER_DEBUG)
+            System.out.printf("Clusterer (P): Clustering complete.%n");
         classifyImagesByBucketIndex();
     }
 
-    public ArrayList<Image>[] createEmptyBuckets(int k) {
-        ArrayList<Image>[] buckets = new ArrayList[k];
+    public void calculateMeans() {
+        for (int bucket = 0; bucket < k; bucket++) {
+            if (FULL_DEBUG || CLUSTER_DEBUG) System.out.printf("Calculating the mean for cluster %d%n", bucket);
 
-        for (int i = 0; i < k; i++) {
-            buckets[i] = new ArrayList<>();
-        }
+            int[][] mean = new int[rows][cols];
+            int count = 0;
 
-        return buckets;
-    }
-    public Image[] calculateMeans() {
-        Image[] means = new Image[buckets.length];
+            for (int image = 0; image < buckets.length; image++) {
 
-        // for each bucket
-        for (int i = 0; i < means.length; i++) {
-            int[][] mean = new int[cols][rows];
-            for(Image img : buckets[i]) {
-                // sum the pixel values
-                for (int j = 0; j < cols; j++) {
-                    for (int k = 0; k < rows; k++) {
-                        mean[j][k] += img.get(k, j);
+                if (buckets[image] == bucket) {
+                    count++;
+
+                    for (int row = 0; row < rows; row++) {
+                        for (int col = 0; col < cols; col++) {
+                            mean[row][col] += images[image].get(row, col);
+                        }
                     }
+
+                }
+
+            }
+
+            for (int row = 0; row < rows; row++) {
+                for (int col = 0; col < cols; col++) {
+                    mean[row][col] /= count;
                 }
             }
 
-            byte[][] img = new byte[cols][rows];
-            for (int j = 0; j < cols; j++) {
-                for (int k = 0; k < rows; k++) {
-                    img[j][k] = (byte)(mean[j][k] / Math.max(buckets[i].size(), 1));
-                }
-            }
-
-            means[i] = new Image(img);
+            means[bucket] = new Image(mean);
         }
+    }
 
-        return means;
+    private int fillBuckets() {
+        return fillBuckets(0);
     }
-    private void fillBuckets() {
-        fillBuckets(0);
-    }
-    private void fillBuckets(int startIndex) {
+
+    private int fillBuckets(int startIndex) {
+        int difference = 0;
+
         for (int i = startIndex; i < images.length; i++) {
-            buckets[ closestBucket(images[i]) ].add( images[i] );
+            int closest = closestBucket(images[i]);
+
+            if (closest != buckets[i]) difference++;
+
+            buckets[i] = closest;
         }
+
+        return difference;
     }
+
     private int closestBucket(Image img) {
         int min = 0;
         double minDiff = Double.MAX_VALUE;
@@ -195,7 +215,7 @@ public class Clusterer {
         for (int i = 0; i < means.length; i++) {
             double diff = norm(i, img);
 
-            if(diff < minDiff) {
+            if (diff < minDiff) {
                 min = i;
                 minDiff = diff;
             }
@@ -203,46 +223,58 @@ public class Clusterer {
 
         return min;
     }
+
     private double norm(int bucketIndex, Image img) {
         return Math.abs(img.dist(means[bucketIndex]));
     }
+
     private double dist(int bucketIndex, Image img) {
         return Math.abs(means[bucketIndex].dist() - img.dist());
     }
+
     private static boolean equalArrays(ArrayList<Image>[] buckets1, ArrayList<Image>[] buckets2) {
-        if(buckets1.length != buckets2.length) return false;
+        if (buckets1.length != buckets2.length) return false;
 
         for (int i = 0; i < buckets1.length; i++) {
-            if(buckets1[i].size() != buckets2[i].size()) return false;
+            if (buckets1[i].size() != buckets2[i].size()) return false;
 
             for (int j = 0; j < buckets1[i].size(); j++) {
-                if(buckets1[i].get(j) != buckets2[i].get(j)) return false;
+                if (buckets1[i].get(j) != buckets2[i].get(j)) return false;
             }
         }
 
         return true;
     }
+
     private static int difference(ArrayList<Image>[] buckets1, ArrayList<Image>[] buckets2) {
         assert buckets1.length == buckets2.length;
 
         int count = 0;
         for (int i = 0; i < buckets1.length; i++) {
             for (int j = 0; j < Math.max(buckets1[i].size(), buckets1[i].size()); j++) {
-                if(j >= buckets1[i].size()) count += buckets2[i].size() - j;
-                if(j >= buckets2[i].size()) count += buckets1[i].size() - j;
+                if (j >= buckets1[i].size()) count += buckets2[i].size() - j;
+                if (j >= buckets2[i].size()) count += buckets1[i].size() - j;
 
-                if(buckets1 != buckets2) count++;
+                if (buckets1 != buckets2) count++;
             }
         }
 
         return count;
     }
 
-    private void classifyImagesByBucketIndex() {
-        if(DEBUG || PROCESS_DEBUG) System.out.println("Clusterer (Any): Classifying images by bucket index...");
+    public void classifyImagesByBucketIndex() {
+        if (DEBUG || PROCESS_DEBUG) System.out.println("Clusterer (Any): Classifying images by bucket index...");
         for (int i = 0; i < buckets.length; i++) {
-            for(Image img : buckets[i]) {
-                img.classify(i);
+            images[i].classify(buckets[i]);
+        }
+    }
+
+    public void classifyImagesByNearestDigit(int[] realClassifications) {
+        for (int bucket = 0; bucket < k; bucket++) {
+            Image[] imgs = getBucket(bucket);
+
+            for (Image img : imgs) {
+                img.classify(realClassifications[imgs[0].id()]);
             }
         }
     }
@@ -250,27 +282,39 @@ public class Clusterer {
     private static void printClassifications(Image[] images, int[] realClassifications) {
         int count = 0;
         for (int i = 0; i < images.length; i++) {
-            if(DEBUG && (FULL_DEBUG || CLASSIFY_DEBUG)) System.out.printf("Clusterer (Ca): Image #%d: clustered as category %d, is a %d. (distance %.2f)%n",
-                    i, images[i].digit(), realClassifications[i], images[i].dist());
-            if(images[i].digit() == realClassifications[i]) count++;
+            if (DEBUG && (FULL_DEBUG || CLASSIFY_DEBUG))
+                System.out.printf("Clusterer (Ca): Image #%d: clustered as category %d, is a %d. (distance %.2f)%n",
+                        i, images[i].digit(), realClassifications[i], images[i].dist());
+            if (images[i].digit() == realClassifications[i]) count++;
         }
     }
 
     public void analyzeBuckets(int[] realClassifications) {
-        int num = 0;
-        for(int i = 0; i < buckets.length; i++) {
-            int[] counts = new int[buckets.length];
-            for(Image img : buckets[i]){
+        for (int bucket = 0; bucket < k; bucket++) {
+            Image[] imgs = getBucket(bucket);
+
+            int[] counts = new int[k];
+            for (Image img : imgs) {
                 counts[realClassifications[img.id()]]++;
             }
+
             int max = 0;
             for (int j = 1; j < counts.length; j++) {
-                if(counts[j] > counts[max]) max = j;
+                if (counts[j] > counts[max]) max = j;
             }
             System.out.printf("Clusterer: Bucket %d: %d mode, total %d " + Arrays.toString(counts) + "%n",
-                    num, max, buckets[i].size());
-            num++;
+                    bucket, max, imgs.length);
         }
+    }
+
+    public int accuracy(int[] realClassifications) {
+        classifyImagesByNearestDigit(realClassifications);
+
+        int correct = 0;
+        for (int i = 0; i < images.length; i++) {
+            if(images[i].digit() == realClassifications[i]) correct++;
+        }
+        return correct;
     }
 
 }
