@@ -5,6 +5,7 @@ public class Viewer {
 
     private static ArrayList<Integer> list = new ArrayList<>();
     private static Image[] images;
+    private static int[] correctDigits;
     private static int current = 0;
     private static int digit = -1;
     private static Gui gui;
@@ -12,6 +13,9 @@ public class Viewer {
     private static boolean DEBUG = Main.DEBUG;
 
     public static Image next() {
+        if(current < correctDigits.length) {
+            System.out.println(correctDigits[current]);
+        }
         if (list.size() > 0) {
             if (current < list.size()) {
                 return images[list.get(current++)];
@@ -195,6 +199,10 @@ public class Viewer {
         view(pixels);
     }
 
+    public static void view(Image[] imgs, int[] correctDigits, int scale) {
+        Viewer.correctDigits = correctDigits;
+        view(imgs, scale);
+    }
     public static void view(Image[] images, int scale) {
         Viewer.images = images;
         view(scale);

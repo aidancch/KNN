@@ -170,6 +170,12 @@ public class KNNClassifier {
 
         return maxVoteIndex; // Return the predicted label
     }
+
+    public void predict(Image[] imgs, int k) {
+        for (Image img : imgs) {
+            img.setDigit(predict(img, k));
+        }
+    }
 }
 
 class DistanceLabelPair implements Comparable<DistanceLabelPair> {
