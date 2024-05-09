@@ -118,8 +118,8 @@ public class Clusterer {
         if (tolerance == -1) tolerance = images.length / 1000;
 
         if (DEBUG || PROCESS_DEBUG || FULL_DEBUG || CLUSTER_DEBUG) {
-            System.out.printf("Clusterer (P): Clustering %d images into %d groups for %d iterations...%n",
-                    images.length, k, iterations);
+            System.out.printf("Clusterer (P): Clustering %d images into %d groups " + (iterations>0? "for %d iterations" : "until below %d tolerance") + "...%n",
+                    images.length, k, iterations>0? iterations:tolerance);
         }
 
         // bucket array cannot be an array; "You cannot create arrays of parameterized types"
@@ -150,6 +150,8 @@ public class Clusterer {
 
             if ((iterations / 100) != 0 && (i % (iterations / 100) == 0 && (DEBUG || PROCESS_DEBUG))) {
                 System.out.printf("Clusterer (P): %02.2f%%, current difference: %d%n", (i+1) * 100.0 / iterations, difference);
+            } else if (iterations <= 0) {
+                System.out.printf("Clusterer (P): Iteration %d, current difference: %d%n", i, difference);
             }
         }
 
@@ -272,9 +274,19 @@ public class Clusterer {
     public void classifyImagesByNearestDigit(int[] realClassifications) {
         for (int bucket = 0; bucket < k; bucket++) {
             Image[] imgs = getBucket(bucket);
+            int[] counts = new int[k];
 
             for (Image img : imgs) {
-                img.classify(realClassifications[imgs[0].id()]);
+                counts[realClassifications[img.id()]]++;
+            }
+
+            int max = 0;
+            for (int j = 1; j < counts.length; j++) {
+                if (counts[j] > counts[max]) max = j;
+            }
+
+            for (Image img : imgs) {
+                img.setDigit(max);
             }
         }
     }
@@ -315,6 +327,15 @@ public class Clusterer {
             if(images[i].digit() == realClassifications[i]) correct++;
         }
         return correct;
+    }
+
+    public void printBuckets() {
+        System.out.print("{");
+        for (int i = 0; i < buckets.length; i++) {
+            System.out.printf("%d", buckets[i]);
+            if(i < buckets.length - 1) System.out.print(", ");
+        }
+        System.out.println("}");
     }
 
 }
