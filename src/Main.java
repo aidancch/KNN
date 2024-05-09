@@ -62,7 +62,7 @@ public class Main {
 //            Image[] bucket = clusterer.getBucket((int)(Math.random() * kMeans));
 //            Viewer.view(bucket, viewScale);
 
-            Viewer.view(testImages, viewScale);
+            Viewer.view(testImages, correctTestDigits, viewScale);
         }
 
         if(DEBUG) clusterer.printBuckets();
