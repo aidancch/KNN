@@ -279,7 +279,7 @@ public class Clusterer {
         }
     }
 
-    private static void printClassifications(Image[] images, int[] realClassifications) {
+    public static void printClassifications(Image[] images, int[] realClassifications) {
         int count = 0;
         for (int i = 0; i < images.length; i++) {
             if (DEBUG && (FULL_DEBUG || CLASSIFY_DEBUG))
