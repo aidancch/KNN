@@ -67,10 +67,13 @@ public class Viewer {
     public static void main(String[] args) {
         String imageFileName = "train-images.idx3-ubyte";
         String labelFileName = "train-labels.idx1-ubyte";
-        int threshold = 0;
         int pixels = 10;
         int errors = 0;
         String option = "";
+        int threshold = 0;
+        int downsize = 0;
+        int despeckle = 0;
+        boolean deskew = false;
 
         for (String arg : args) {
             try {
@@ -97,6 +100,21 @@ public class Viewer {
 
                     case "-threshold":
                         threshold = checkValue(arg, 0, 255);
+                        option = "";
+                        continue;
+
+                    case "-downsize":
+                        downsize = checkValue(arg, 0, 28);
+                        option = "";
+                        continue;
+
+                    case "-despeckle":
+                        despeckle = checkValue(arg, 0, 255);
+                        option = "";
+                        continue;
+
+                    case "deskew":
+                        deskew = true;
                         option = "";
                         continue;
                 }
@@ -153,9 +171,24 @@ public class Viewer {
             return;
         }
 
-        if (threshold > 0) {
+        if (threshold != 0) {
             for (Image image : images) {
                 image.threshold(threshold);
+            }
+        }
+        else if (downsize != 0) {
+            for (Image image : images) {
+                image.downsize(downsize);
+            }
+        }
+        else if (despeckle != 0) {
+            for (Image image : images) {
+                image.despeckle(8);
+            }
+        }
+        else if (deskew) {
+            for (Image image : images) {
+                image.deskew();
             }
         }
 
