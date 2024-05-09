@@ -42,10 +42,12 @@ public class Main {
             throw new RuntimeException(e);
         }
 
-//        Image.downsize(images, 2);
+        Image.customizeImage(images);
 
         Clusterer clusterer = new Clusterer(images, kMeans, images[0].rows(), images[0].columns());
         clusterer.cluster(iterations, tolerance);
+        clusterer.classifyImagesByNearestDigit(correctDigits);
+
         if(DEBUG) {
             clusterer.analyzeBuckets(correctDigits);
             int correct = clusterer.accuracy(correctDigits);
@@ -74,10 +76,12 @@ public class Main {
                 case "-km", "-kmeans", "-buckets", "-clusters" -> kMeans = Integer.parseInt(args[++i]);
                 case "-kn", "-knn", "-kneighbors" -> kNN = Integer.parseInt(args[++i]);
                 case "-i", "-iterations" -> iterations = Integer.parseInt(args[++i]);
-                case "-t", "-tolerance" -> tolerance = Integer.parseInt(args[++i]);
+                case "-tol", "-tolerance" -> tolerance = Integer.parseInt(args[++i]);
 
                 case "-f", "-img", "-images" -> imageFileName = args[++i];
-                case "-l", "-train", "-labels" -> labelFileName = args[++i];
+                case "-t", "-l", "-train", "-labels" -> labelFileName = args[++i];
+                case "-test", "-timages" -> testImageFileName = args[++i];
+                case "-tlabels", "-testlabels" -> testLabelFileName = args[++i];
 
                 case "-s", "-scale", "-view" -> viewScale = Integer.parseInt(args[++i]);
             }
