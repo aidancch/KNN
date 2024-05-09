@@ -6,10 +6,13 @@ public class Main {
     public static boolean DEBUG = false, PRINT_PROCESS = true;
     public static int kMeans = 10, kNN = 3, iterations = 0, tolerance = -1, viewScale = 10;
     public static String imageFileName = "src/train-images.idx3-ubyte", labelFileName = "src/train-labels.idx1-ubyte";
+    public static String testImageFileName = "src/t10k-images.idx3-ubyte", testLabelFileName = "src/t10k-labels.idx1-ubyte";
 
     public static void main(String[] args) {
         Image[] images = new Image[0];
+        Image[] testImages = new Image[0];
         int[] correctDigits = new int[0];
+        int[] correctTestDigits = new int[0];
 
         parseArgs(args);
 
@@ -27,6 +30,14 @@ public class Main {
             } else {
                 throw new FileNotFoundException("Cannot read null file / cannot run on only label file");
             }
+
+            if(testImageFileName != null && testLabelFileName != null) {
+                testImages = Reader.read(testImageFileName, testLabelFileName);
+                correctTestDigits = new int[testImages.length];
+                for (int i = 0; i < testImages.length; i++) {
+                    correctTestDigits[i] = testImages[i].digit();
+                }
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -35,9 +46,15 @@ public class Main {
 
         Clusterer clusterer = new Clusterer(images, kMeans, images[0].rows(), images[0].columns());
         clusterer.cluster(iterations, tolerance);
-        clusterer.analyzeBuckets(correctDigits);
-        int correct = clusterer.accuracy(correctDigits);
-        System.out.printf("Accuracy: %d / %d correct, (%.2f%%)%n", correct, images.length, correct * 100.0 / images.length);
+        if(DEBUG) {
+            clusterer.analyzeBuckets(correctDigits);
+            int correct = clusterer.accuracy(correctDigits);
+            System.out.printf("Accuracy: %d / %d correct, (%.2f%%)%n", correct, images.length, correct * 100.0 / images.length);
+        }
+
+        KNNClassifier classifier = new KNNClassifier(images);
+
+        classifier.predict(testImages, kNN);
 
         if(viewScale > 0) {
 //            Viewer.view(clusterer.getMeans(), viewScale);
@@ -45,8 +62,10 @@ public class Main {
 //            Image[] bucket = clusterer.getBucket((int)(Math.random() * kMeans));
 //            Viewer.view(bucket, viewScale);
 
-            Viewer.view(images, viewScale);
+            Viewer.view(testImages, viewScale);
         }
+
+        if(DEBUG) clusterer.printBuckets();
     }
 
     public static void parseArgs(String[] args) {
