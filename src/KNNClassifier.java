@@ -138,6 +138,7 @@ public class KNNClassifier {
     public KNNClassifier() {
         this.trainedData = null;
     }
+    public KNNClassifier(Image[] trainData) { this.trainedData = trainData; }
 
     public void train(Image[] trainData) {
         this.trainedData = trainData;
